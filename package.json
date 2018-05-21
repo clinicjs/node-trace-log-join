@@ -1,6 +1,6 @@
 {
   "name": "node-trace-log-join",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Easily combine multiple node_trace files into a single one",
   "main": "index.js",
   "bin": {
