@@ -6,6 +6,8 @@ Easily combine multiple node_trace files into a single one
 npm install node-trace-log-join
 ```
 
+[![Build Status](https://travis-ci.org/mafintosh/node-trace-log-join.svg?branch=master)](https://travis-ci.org/mafintosh/node-trace-log-join)
+
 ## Usage
 
 ``` js
