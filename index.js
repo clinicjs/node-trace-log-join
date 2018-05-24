@@ -1,4 +1,4 @@
-const stream = require('readable-stream')
+const through = require('through2')
 const JSONStream = require('JSONStream')
 const multistream = require('multistream')
 const pump = require('pump')
@@ -84,15 +84,7 @@ function sort (a, b) {
 }
 
 function parse (filename) {
-  return pump(fs.createReadStream(filename), toStreams2(JSONStream.parse('traceEvents.*')))
-}
-
-function toStreams2 (s) { // needed until https://github.com/feross/multistream/pull/27 lands
-  var wrap = new stream.Readable({objectMode: true, highWaterMark: 16}).wrap(s)
-  if (s.destroy) {
-    wrap.destroy = s.destroy.bind(s)
-  }
-  return wrap
+  return pump(fs.createReadStream(filename), JSONStream.parse('traceEvents.*'), through.obj())
 }
 
 function noop () {}

@@ -13,7 +13,7 @@
     "JSONStream": "^1.3.2",
     "multistream": "^2.1.0",
     "pump": "^3.0.0",
-    "readable-stream": "^2.3.6"
+    "through2": "^2.0.3"
   },
   "devDependencies": {
     "standard": "^11.0.1",
