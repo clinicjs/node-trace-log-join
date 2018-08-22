@@ -1,5 +1,5 @@
 const through = require('through2')
-const JSONStream = require('JSONStream')
+const parser = require('@nearform/trace-events-parser')
 const multistream = require('multistream')
 const pump = require('pump')
 const fs = require('fs')
@@ -26,7 +26,7 @@ function nodeTraceJoin (pattern, output, cb) {
 
     pump(
       multistream.obj(files.map(parse)),
-      JSONStream.stringify('{"traceEvents":[', ',', ']}'),
+      stringify(),
       fs.createWriteStream(output),
       onunlink
     )
@@ -83,8 +83,27 @@ function sort (a, b) {
   return a < b ? -1 : 1
 }
 
+function stringify () {
+  var sep = false
+
+  const s = through({writableObjectMode: true, readableObjectMode: false}, write, flush)
+  s.push('{"traceEvents":[')
+  return s
+
+  function write (data, enc, cb) {
+    const s = sep ? ',' : ''
+    sep = true
+    cb(null, s + JSON.stringify(data))
+  }
+
+  function flush (cb) {
+    this.push(']}')
+    cb(null)
+  }
+}
+
 function parse (filename) {
-  return pump(fs.createReadStream(filename), JSONStream.parse('traceEvents.*'), through.obj())
+  return pump(fs.createReadStream(filename), parser())
 }
 
 function noop () {}

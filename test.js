@@ -6,10 +6,10 @@ const join = require('./')
 clean()
 
 tape('one file', function (t) {
-  write('node_trace.1.log', [{a: true}])
+  write('node_trace.1.log', [{a: true, d: {}}])
   join('node_trace.1.log', 'output.log', function (err) {
     t.error(err, 'no error')
-    t.same(read('output.log'), {traceEvents: [{a: true}]})
+    t.same(read('output.log'), {traceEvents: [{a: true, d: {}}]})
     t.same(logs(), ['output.log'])
     clean()
     t.end()
@@ -17,12 +17,12 @@ tape('one file', function (t) {
 })
 
 tape('multiple files', function (t) {
-  write('node_trace.1.log', [{a: true}])
-  write('node_trace.2.log', [{b: true}])
-  write('node_trace.3.log', [{c: true}])
+  write('node_trace.1.log', [{a: true, d: {}}])
+  write('node_trace.2.log', [{b: true, d: {}}])
+  write('node_trace.3.log', [{c: true, d: {}}])
   join('node_trace.*.log', 'output.log', function (err) {
     t.error(err, 'no error')
-    t.same(read('output.log'), {traceEvents: [{a: true}, {b: true}, {c: true}]})
+    t.same(read('output.log'), {traceEvents: [{a: true, d: {}}, {b: true, d: {}}, {c: true, d: {}}]})
     t.same(logs(), ['output.log'])
     clean()
     t.end()
@@ -30,12 +30,12 @@ tape('multiple files', function (t) {
 })
 
 tape('multiple files as array', function (t) {
-  write('node_trace.1.log', [{a: true}])
-  write('node_trace.2.log', [{b: true}])
-  write('node_trace.3.log', [{c: true}])
+  write('node_trace.1.log', [{a: true, d: {}}])
+  write('node_trace.2.log', [{b: true, d: {}}])
+  write('node_trace.3.log', [{c: true, d: {}}])
   join(['node_trace.1.log', 'node_trace.2.log'], 'output.log', function (err) {
     t.error(err, 'no error')
-    t.same(read('output.log'), {traceEvents: [{a: true}, {b: true}]})
+    t.same(read('output.log'), {traceEvents: [{a: true, d: {}}, {b: true, d: {}}]})
     t.same(logs().sort(), ['node_trace.3.log', 'output.log'])
     clean()
     t.end()
@@ -45,8 +45,8 @@ tape('multiple files as array', function (t) {
 tape('lots of files', function (t) {
   const expected = []
   for (var i = 0; i < 15; i++) {
-    expected.push(i)
-    write(`node_trace.${i}.log`, [i])
+    expected.push({a: i, d: {}})
+    write(`node_trace.${i}.log`, [{a: i, d: {}}])
   }
   join('node_trace.*.log', 'output.log', function (err) {
     t.error(err, 'no error')
