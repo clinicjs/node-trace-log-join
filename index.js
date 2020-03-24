@@ -1,6 +1,7 @@
 const through = require('through2')
 const parser = require('@nearform/trace-events-parser')
-const multistream = require('multistream')
+// multistream fork with https://github.com/feross/multistream/pull/47 applied
+const multistream = require('@nearform/multistream')
 const pump = require('pump')
 const fs = require('fs')
 const path = require('path')
