@@ -11,9 +11,9 @@
   },
   "dependencies": {
     "@nearform/trace-events-parser": "^1.0.0",
-    "multistream": "^2.1.0",
+    "@nearform/multistream": "5.0.0-2",
     "pump": "^3.0.0",
-    "through2": "^2.0.3"
+    "through2": "^3.0.1"
   },
   "devDependencies": {
     "standard": "^11.0.1",
