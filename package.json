@@ -1,5 +1,5 @@
 {
-  "name": "node-trace-log-join",
+  "name": "@clinic/node-trace-log-join",
   "version": "1.0.2",
   "description": "Easily combine multiple node_trace files into a single one",
   "main": "index.js",
@@ -10,7 +10,7 @@
     "test": "standard && tape test.js"
   },
   "dependencies": {
-    "@nearform/trace-events-parser": "^1.0.0",
+    "@clinic/trace-events-parser": "^2.0.0",
     "multistream": "^2.1.0",
     "pump": "^3.0.0",
     "through2": "^2.0.3"
@@ -21,12 +21,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mafintosh/node-trace-log-join.git"
+    "url": "https://github.com/clinicjs/node-trace-log-join.git"
   },
   "author": "Mathias Buus (@mafintosh)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mafintosh/node-trace-log-join/issues"
+    "url": "https://github.com/clinicjs/node-trace-log-join/issues"
   },
-  "homepage": "https://github.com/mafintosh/node-trace-log-join"
+  "homepage": "https://github.com/clinicjs/node-trace-log-join"
 }

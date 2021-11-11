@@ -1,5 +1,5 @@
 const through = require('through2')
-const parser = require('@nearform/trace-events-parser')
+const parser = require('@clinic/trace-events-parser')
 const multistream = require('multistream')
 const pump = require('pump')
 const fs = require('fs')
