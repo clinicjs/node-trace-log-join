@@ -3,7 +3,7 @@
 Easily combine multiple node_trace files into a single one
 
 ```
-npm install node-trace-log-join
+npm install @clinic/node-trace-log-join
 ```
 
 [![Build Status](https://travis-ci.org/mafintosh/node-trace-log-join.svg?branch=master)](https://travis-ci.org/mafintosh/node-trace-log-join)
@@ -11,7 +11,7 @@ npm install node-trace-log-join
 ## Usage
 
 ``` js
-var join = require('node-trace-log-join')
+var join = require('@clinic/node-trace-log-join')
 
 join('node_trace.*.log', 'combined.log', function (err) {
   if (err) throw err
