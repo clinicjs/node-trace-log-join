@@ -7,7 +7,9 @@
     "node-trace-log-join": "./bin.js"
   },
   "scripts": {
-    "test": "standard && node --test index.test.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "npm run lint && node --test index.test.js",
     "test:coverage": "node --experimental-test-coverage --test-coverage-lines=100 --test-coverage-branches=100 --test index.test.js"
   },
   "dependencies": {
@@ -17,7 +19,8 @@
     "through2": "^2.0.3"
   },
   "devDependencies": {
-    "standard": "^11.0.1"
+    "eslint": "^10.5.0",
+    "neostandard": "^0.14.1"
   },
   "repository": {
     "type": "git",

@@ -34,10 +34,10 @@ function nodeTraceJoin (pattern, output, cb) {
     function onunlink (err) {
       if (err) return cb(err)
 
-      var missing = files.length
-      var error = null
+      let missing = files.length
+      let error = null
 
-      for (var i = 0; i < files.length; i++) fs.unlink(files[i], done)
+      for (let i = 0; i < files.length; i++) fs.unlink(files[i], done)
 
       function done (err) {
         if (err && err.code !== 'ENOENT') error = err
@@ -48,8 +48,8 @@ function nodeTraceJoin (pattern, output, cb) {
   }
 
   function filterPattern (file) {
-    var offset = 0
-    for (var i = 0; i < filePattern.length; i++) {
+    let offset = 0
+    for (let i = 0; i < filePattern.length; i++) {
       const next = file.indexOf(filePattern[i], offset)
       if (next === -1) return false
       offset = next + filePattern[i].length
@@ -84,9 +84,9 @@ function sort (a, b) {
 }
 
 function stringify () {
-  var sep = false
+  let sep = false
 
-  const s = through({writableObjectMode: true, readableObjectMode: false}, write, flush)
+  const s = through({ writableObjectMode: true, readableObjectMode: false }, write, flush)
   s.push('{"traceEvents":[')
   return s
 
