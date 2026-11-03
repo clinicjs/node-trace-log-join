@@ -11,15 +11,18 @@
     "lint:fix": "eslint . --fix",
     "test": "npm run lint && node --test index.test.js",
     "test:coverage": "node --experimental-test-coverage --test-coverage-lines=100 --test-coverage-branches=100 --test index.test.js",
-    "bench": "node benchmark/run.js"
+    "bench": "node benchmark/run.js",
+    "typecheck": "tsc --project tsconfig.json"
   },
   "dependencies": {
     "@clinic/trace-events-parser": "^2.0.0"
   },
   "devDependencies": {
+    "@types/node": "^24.19.2",
     "eslint": "^10.5.0",
     "neostandard": "^0.14.1",
-    "tinybench": "^6.2.3"
+    "tinybench": "^6.2.3",
+    "typescript": "^7.0.2"
   },
   "repository": {
     "type": "git",

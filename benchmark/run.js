@@ -1,9 +1,10 @@
 const fs = require('fs')
 const path = require('path')
-const {cleanupFixtures, createFixtures} = require('./trace-fixtures')
+const { cleanupFixtures, createFixtures } = require('./trace-fixtures')
 
+/** Loads each benchmark case, runs Tinybench, and removes the fixtures. */
 async function main () {
-  const {Bench} = await import('tinybench')
+  const { Bench } = await import('tinybench')
   const fixtures = createFixtures()
   const bench = new Bench({
     name: 'Trace join stream and filename sorting benchmarks',

@@ -8,7 +8,7 @@ const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'node-trace-log-join-'))
 
 after(() => fs.rmSync(tempDir, { recursive: true, force: true }))
 
-test('one file', async function (t) {
+test('one file', /** @param {import('node:test').TestContext} t */ async function (t) {
   t.plan(3)
   clean()
   write('node_trace.1.log', [{ a: true, d: {} }])
@@ -22,7 +22,7 @@ test('one file', async function (t) {
   }
 })
 
-test('multiple files', async function (t) {
+test('multiple files', /** @param {import('node:test').TestContext} t */ async function (t) {
   t.plan(3)
   clean()
   write('node_trace.1.log', [{ a: true, d: {} }])
@@ -38,7 +38,7 @@ test('multiple files', async function (t) {
   }
 })
 
-test('multiple files as array', async function (t) {
+test('multiple files as array', /** @param {import('node:test').TestContext} t */ async function (t) {
   t.plan(3)
   clean()
   write('node_trace.1.log', [{ a: true, d: {} }])
@@ -54,7 +54,7 @@ test('multiple files as array', async function (t) {
   }
 })
 
-test('lots of files', async function (t) {
+test('lots of files', /** @param {import('node:test').TestContext} t */ async function (t) {
   t.plan(3)
   clean()
   const expected = []
@@ -72,19 +72,20 @@ test('lots of files', async function (t) {
   }
 })
 
-test('no files', async function (t) {
+test('no files', /** @param {import('node:test').TestContext} t */ async function (t) {
   t.plan(2)
   clean()
   try {
     const err = await joinFiles('node_trace.*.log')
     t.assert.ok(err)
+    if (!err) throw new Error('Expected no-files error')
     t.assert.strictEqual(err.code, 'ENOENT')
   } finally {
     clean()
   }
 })
 
-test('files without trace indexes', async function (t) {
+test('files without trace indexes', /** @param {import('node:test').TestContext} t */ async function (t) {
   t.plan(2)
   clean()
   write('trace-a.log', [{ a: true, d: {} }])
@@ -98,18 +99,19 @@ test('files without trace indexes', async function (t) {
   }
 })
 
-test('missing callback is optional', function (t) {
+test('missing callback is optional', /** @param {import('node:test').TestContext} t */ function (t) {
   t.plan(0)
   join([], path.join(tempDir, 'output.log'))
 })
 
-test('directory read errors are returned', async function (t) {
+test('directory read errors are returned', /** @param {import('node:test').TestContext} t */ async function (t) {
   t.plan(1)
   const err = await joinFiles('missing-directory/node_trace.*.log')
+  if (!err) throw new Error('Expected directory read error')
   t.assert.strictEqual(err.code, 'ENOENT')
 })
 
-test('suffix must match the end of a filename', async function (t) {
+test('suffix must match the end of a filename', /** @param {import('node:test').TestContext} t */ async function (t) {
   t.plan(2)
   clean()
   write('node_trace.1.log.extra', [{ a: true, d: {} }])
@@ -117,67 +119,75 @@ test('suffix must match the end of a filename', async function (t) {
   try {
     const err = await joinFiles('node_trace.*.log')
     t.assert.ok(err)
+    if (!err) throw new Error('Expected no-files error')
     t.assert.strictEqual(err.code, 'ENOENT')
   } finally {
     clean()
   }
 })
 
-test('prefix before the first wildcard must match the filename start', async function (t) {
+test('prefix before the first wildcard must match the filename start', /** @param {import('node:test').TestContext} t */ async function (t) {
   t.plan(3)
   clean()
-  write('node_trace.1.log', [{a: true, d: {}}])
-  write('prefix-node_trace.2.log', [{b: true, d: {}}])
+  write('node_trace.1.log', [{ a: true, d: {} }])
+  write('prefix-node_trace.2.log', [{ b: true, d: {} }])
   try {
     const err = await joinFiles('node_trace.*.log')
     t.assert.ifError(err)
-    t.assert.deepStrictEqual(read('output.log'), {traceEvents: [{a: true, d: {}}]})
+    t.assert.deepStrictEqual(read('output.log'), { traceEvents: [{ a: true, d: {} }] })
     t.assert.deepStrictEqual(logs().sort(), ['output.log', 'prefix-node_trace.2.log'])
   } finally {
     clean()
   }
 })
 
-test('existing output matching a glob is excluded from inputs', async function (t) {
+test('existing output matching a glob is excluded from inputs', /** @param {import('node:test').TestContext} t */ async function (t) {
   t.plan(3)
   clean()
-  write('node_trace.1.log', [{a: true, d: {}}])
-  write('node_trace.2.log', [{b: true, d: {}}])
-  write('node_trace.output.log', [{old: true, d: {}}])
+  write('node_trace.1.log', [{ a: true, d: {} }])
+  write('node_trace.2.log', [{ b: true, d: {} }])
+  write('node_trace.output.log', [{ old: true, d: {} }])
   try {
     const err = await joinFiles('node_trace.*.log', 'node_trace.output.log')
     t.assert.ifError(err)
-    t.assert.deepStrictEqual(read('node_trace.output.log'), {traceEvents: [{a: true, d: {}}, {b: true, d: {}}]})
+    t.assert.deepStrictEqual(read('node_trace.output.log'), { traceEvents: [{ a: true, d: {} }, { b: true, d: {} }] })
     t.assert.deepStrictEqual(logs(), ['node_trace.output.log'])
   } finally {
     clean()
   }
 })
 
-test('output path in explicit inputs is rejected', async function (t) {
+test('output path in explicit inputs is rejected', /** @param {import('node:test').TestContext} t */ async function (t) {
   t.plan(2)
   clean()
-  write('node_trace.1.log', [{a: true, d: {}}])
-  write('node_trace.2.log', [{b: true, d: {}}])
-  write('output.log', [{old: true, d: {}}])
+  write('node_trace.1.log', [{ a: true, d: {} }])
+  write('node_trace.2.log', [{ b: true, d: {} }])
+  write('output.log', [{ old: true, d: {} }])
   try {
     const err = await joinFiles(['node_trace.1.log', 'output.log', 'node_trace.2.log'])
+    if (!err) throw new Error('Expected input/output collision error')
     t.assert.strictEqual(err.message, 'Output file cannot also be an input file')
-    t.assert.deepStrictEqual(read('output.log'), {traceEvents: [{old: true, d: {}}]})
+    t.assert.deepStrictEqual(read('output.log'), { traceEvents: [{ old: true, d: {} }] })
   } finally {
     clean()
   }
 })
 
-test('sorts unindexed files in lexical order', async function (t) {
+test('sorts unindexed files in lexical order', /** @param {import('node:test').TestContext} t */ async function (t) {
   t.plan(2)
   clean()
   write('trace-z.log', [{ z: true, d: {} }])
   write('trace-a.log', [{ a: true, d: {} }])
   const readdir = fs.readdir
-  fs.readdir = function (dir, cb) {
+  /**
+   * @param {string} dir
+   * @param {object} options
+   * @param {any} cb
+   */
+  function mockReaddir (dir, options, cb) {
     process.nextTick(() => cb(null, ['trace-z.log', 'trace-a.log']))
   }
+  fs.readdir = /** @type {*} */ (mockReaddir)
   try {
     const err = await joinFiles('trace-*.log')
     t.assert.ifError(err)
@@ -188,14 +198,20 @@ test('sorts unindexed files in lexical order', async function (t) {
   }
 })
 
-test('duplicate input names compare equal when sorted', async function (t) {
+test('duplicate input names compare equal when sorted', /** @param {import('node:test').TestContext} t */ async function (t) {
   t.plan(2)
   clean()
   write('trace-a.log', [{ a: true, d: {} }])
   const readdir = fs.readdir
-  fs.readdir = function (dir, cb) {
+  /**
+   * @param {string} dir
+   * @param {object} options
+   * @param {any} cb
+   */
+  function mockReaddir (dir, options, cb) {
     process.nextTick(() => cb(null, ['trace-a.log', 'trace-a.log']))
   }
+  fs.readdir = /** @type {*} */ (mockReaddir)
   try {
     const err = await joinFiles('trace-*.log')
     t.assert.ifError(err)
@@ -206,15 +222,15 @@ test('duplicate input names compare equal when sorted', async function (t) {
   }
 })
 
-test('write errors are returned', async function (t) {
+test('write errors are returned', /** @param {import('node:test').TestContext} t */ async function (t) {
   t.plan(2)
   clean()
   write('node_trace.1.log', [{ a: true, d: {} }])
   write('node_trace.2.log', [{ b: true, d: {} }])
   const createWriteStream = fs.createWriteStream
-  fs.createWriteStream = function () {
+  fs.createWriteStream = /** @type {*} */ (function () {
     return new Writable({ write (chunk, enc, cb) { cb(new Error('write failed')) } })
-  }
+  })
   try {
     const err = await joinFiles('node_trace.*.log')
     t.assert.ok(err)
@@ -225,15 +241,20 @@ test('write errors are returned', async function (t) {
   }
 })
 
-test('unlink errors are returned', async function (t) {
+test('unlink errors are returned', /** @param {import('node:test').TestContext} t */ async function (t) {
   t.plan(2)
   clean()
   write('node_trace.1.log', [{ a: true, d: {} }])
   write('node_trace.2.log', [{ b: true, d: {} }])
   const unlink = fs.unlink
-  fs.unlink = function (filename, cb) {
+  /**
+   * @param {import('node:fs').PathLike} filename
+   * @param {import('node:fs').NoParamCallback} cb
+   */
+  function mockUnlink (filename, cb) {
     process.nextTick(() => cb(new Error('unlink failed')))
   }
+  fs.unlink = /** @type {*} */ (mockUnlink)
   try {
     const err = await joinFiles('node_trace.*.log')
     t.assert.ok(err)
@@ -244,6 +265,13 @@ test('unlink errors are returned', async function (t) {
   }
 })
 
+/**
+ * Runs the public join API against files in the test temporary directory.
+ *
+ * @param {string|string[]} files Input filename or filenames relative to tempDir.
+ * @param {string} [output='output.log'] Output filename relative to tempDir.
+ * @returns {Promise<NodeJS.ErrnoException|null>} Join callback error, if any.
+ */
 function joinFiles (files, output = 'output.log') {
   if (Array.isArray(files)) {
     const names = files
@@ -255,6 +283,7 @@ function joinFiles (files, output = 'output.log') {
   return new Promise(resolve => join(files, path.join(tempDir, output), err => resolve(err)))
 }
 
+/** @returns {string[]} Log filenames currently in the test directory. */
 function logs () {
   const files = fs.readdirSync(tempDir)
   const logFiles = []
@@ -264,14 +293,17 @@ function logs () {
   return logFiles
 }
 
+/** Reads and parses a JSON file from the test directory. @param {string} name */
 function read (name) {
-  return JSON.parse(fs.readFileSync(path.join(tempDir, name)))
+  return JSON.parse(fs.readFileSync(path.join(tempDir, name), 'utf8'))
 }
 
+/** Removes log files left in the test directory. @returns {void} */
 function clean () {
   for (const name of logs()) fs.unlinkSync(path.join(tempDir, name))
 }
 
+/** Writes trace events to a fixture log file. @param {string} name @param {object[]} json */
 function write (name, json) {
   fs.writeFileSync(path.join(tempDir, name), JSON.stringify({ traceEvents: json }))
 }
