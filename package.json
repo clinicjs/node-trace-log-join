@@ -13,10 +13,7 @@
     "test:coverage": "node --experimental-test-coverage --test-coverage-lines=100 --test-coverage-branches=100 --test index.test.js"
   },
   "dependencies": {
-    "@clinic/trace-events-parser": "^2.0.0",
-    "multistream": "^2.1.0",
-    "pump": "^3.0.0",
-    "through2": "^2.0.3"
+    "@clinic/trace-events-parser": "^2.0.0"
   },
   "devDependencies": {
     "eslint": "^10.5.0",

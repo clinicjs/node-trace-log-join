@@ -1,9 +1,7 @@
-const through = require('through2')
 const parser = require('@clinic/trace-events-parser')
-const multistream = require('multistream')
-const pump = require('pump')
 const fs = require('fs')
 const path = require('path')
+const {pipeline, Readable, Transform} = require('stream')
 
 module.exports = nodeTraceJoin
 
@@ -24,8 +22,8 @@ function nodeTraceJoin (pattern, output, cb) {
     if (!files.length) return cb(notFound('No files matching the pattern found'))
     if (files.length === 1) return fs.rename(files[0], output, cb)
 
-    pump(
-      multistream.obj(files.map(parse)),
+    pipeline(
+      Readable.from(readFiles(files)),
       stringify(),
       fs.createWriteStream(output),
       onunlink
@@ -86,7 +84,11 @@ function sort (a, b) {
 function stringify () {
   let sep = false
 
-  const s = through({ writableObjectMode: true, readableObjectMode: false }, write, flush)
+  const s = new Transform({
+    writableObjectMode: true,
+    transform: write,
+    flush
+  })
   s.push('{"traceEvents":[')
   return s
 
@@ -103,7 +105,13 @@ function stringify () {
 }
 
 function parse (filename) {
-  return pump(fs.createReadStream(filename), parser())
+  return pipeline(fs.createReadStream(filename), parser(), noop)
+}
+
+async function * readFiles (files) {
+  for (const filename of files) {
+    for await (const event of parse(filename)) yield event
+  }
 }
 
 function noop () {}
