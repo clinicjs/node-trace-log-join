@@ -2,20 +2,38 @@ const parser = require('@clinic/trace-events-parser')
 const fs = require('fs')
 const path = require('path')
 const {pipeline, Readable, Transform} = require('stream')
+const TRACE_FILE_PATTERN = /^node_trace\.(\d+)\.log$/
 
 module.exports = nodeTraceJoin
 
 function nodeTraceJoin (pattern, output, cb) {
   if (!cb) cb = noop
-  if (Array.isArray(pattern)) return combine(pattern)
+  if (Array.isArray(pattern)) {
+    const outputPath = path.resolve(output)
+    for (const file of pattern) {
+      if (path.resolve(file) === outputPath) {
+        const err = new Error('Output file cannot also be an input file')
+        return cb(err)
+      }
+    }
+    return combine(pattern)
+  }
 
   const dir = path.dirname(pattern)
   const filePattern = path.basename(pattern).split('*')
 
   fs.readdir(dir, function (err, files) {
     if (err) return cb(err)
-    files = files.filter(filterPattern).sort(sort).map(file => path.join(dir, file))
-    combine(files)
+    const outputPath = path.resolve(output)
+    const inputs = []
+    for (const file of files) {
+      if (!filterPattern(file)) continue
+      if (path.resolve(dir, file) === outputPath) continue
+      inputs.push(file)
+    }
+    inputs.sort(sort)
+    for (let i = 0; i < inputs.length; i++) inputs[i] = path.join(dir, inputs[i])
+    combine(inputs)
   })
 
   function combine (files) {
@@ -49,7 +67,7 @@ function nodeTraceJoin (pattern, output, cb) {
     let offset = 0
     for (let i = 0; i < filePattern.length; i++) {
       const next = file.indexOf(filePattern[i], offset)
-      if (next === -1) return false
+      if (next === -1 || (i === 0 && next !== 0)) return false
       offset = next + filePattern[i].length
     }
     if (filePattern[filePattern.length - 1]) {
@@ -68,15 +86,14 @@ function notFound (msg) {
 }
 
 function index (n) {
-  const m = n.match(/node_trace\.(\d+)\.log/)
-  if (m) return Number(m[1])
-  return 0
+  const m = TRACE_FILE_PATTERN.exec(n)
+  return m ? Number(m[1]) : null
 }
 
 function sort (a, b) {
   const ai = index(a)
   const bi = index(b)
-  if (ai && bi) return ai - bi
+  if (ai !== null && bi !== null) return ai - bi
   if (a === b) return 0
   return a < b ? -1 : 1
 }

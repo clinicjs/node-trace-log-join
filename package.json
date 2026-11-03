@@ -10,14 +10,16 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "npm run lint && node --test index.test.js",
-    "test:coverage": "node --experimental-test-coverage --test-coverage-lines=100 --test-coverage-branches=100 --test index.test.js"
+    "test:coverage": "node --experimental-test-coverage --test-coverage-lines=100 --test-coverage-branches=100 --test index.test.js",
+    "bench": "node benchmark/run.js"
   },
   "dependencies": {
     "@clinic/trace-events-parser": "^2.0.0"
   },
   "devDependencies": {
     "eslint": "^10.5.0",
-    "neostandard": "^0.14.1"
+    "neostandard": "^0.14.1",
+    "tinybench": "^6.2.3"
   },
   "repository": {
     "type": "git",

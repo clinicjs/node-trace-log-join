@@ -123,6 +123,52 @@ test('suffix must match the end of a filename', async function (t) {
   }
 })
 
+test('prefix before the first wildcard must match the filename start', async function (t) {
+  t.plan(3)
+  clean()
+  write('node_trace.1.log', [{a: true, d: {}}])
+  write('prefix-node_trace.2.log', [{b: true, d: {}}])
+  try {
+    const err = await joinFiles('node_trace.*.log')
+    t.assert.ifError(err)
+    t.assert.deepStrictEqual(read('output.log'), {traceEvents: [{a: true, d: {}}]})
+    t.assert.deepStrictEqual(logs().sort(), ['output.log', 'prefix-node_trace.2.log'])
+  } finally {
+    clean()
+  }
+})
+
+test('existing output matching a glob is excluded from inputs', async function (t) {
+  t.plan(3)
+  clean()
+  write('node_trace.1.log', [{a: true, d: {}}])
+  write('node_trace.2.log', [{b: true, d: {}}])
+  write('node_trace.output.log', [{old: true, d: {}}])
+  try {
+    const err = await joinFiles('node_trace.*.log', 'node_trace.output.log')
+    t.assert.ifError(err)
+    t.assert.deepStrictEqual(read('node_trace.output.log'), {traceEvents: [{a: true, d: {}}, {b: true, d: {}}]})
+    t.assert.deepStrictEqual(logs(), ['node_trace.output.log'])
+  } finally {
+    clean()
+  }
+})
+
+test('output path in explicit inputs is rejected', async function (t) {
+  t.plan(2)
+  clean()
+  write('node_trace.1.log', [{a: true, d: {}}])
+  write('node_trace.2.log', [{b: true, d: {}}])
+  write('output.log', [{old: true, d: {}}])
+  try {
+    const err = await joinFiles(['node_trace.1.log', 'output.log', 'node_trace.2.log'])
+    t.assert.strictEqual(err.message, 'Output file cannot also be an input file')
+    t.assert.deepStrictEqual(read('output.log'), {traceEvents: [{old: true, d: {}}]})
+  } finally {
+    clean()
+  }
+})
+
 test('sorts unindexed files in lexical order', async function (t) {
   t.plan(2)
   clean()
@@ -145,13 +191,13 @@ test('sorts unindexed files in lexical order', async function (t) {
 test('duplicate input names compare equal when sorted', async function (t) {
   t.plan(2)
   clean()
-  write('node_trace.0.log', [{ a: true, d: {} }])
+  write('trace-a.log', [{ a: true, d: {} }])
   const readdir = fs.readdir
   fs.readdir = function (dir, cb) {
-    process.nextTick(() => cb(null, ['node_trace.0.log', 'node_trace.0.log']))
+    process.nextTick(() => cb(null, ['trace-a.log', 'trace-a.log']))
   }
   try {
-    const err = await joinFiles('node_trace.*.log')
+    const err = await joinFiles('trace-*.log')
     t.assert.ifError(err)
     t.assert.deepStrictEqual(read('output.log'), { traceEvents: [{ a: true, d: {} }, { a: true, d: {} }] })
   } finally {
@@ -198,14 +244,24 @@ test('unlink errors are returned', async function (t) {
   }
 })
 
-function joinFiles (files) {
-  if (Array.isArray(files)) files = files.map(name => path.join(tempDir, name))
-  else files = path.join(tempDir, files)
-  return new Promise(resolve => join(files, path.join(tempDir, 'output.log'), err => resolve(err)))
+function joinFiles (files, output = 'output.log') {
+  if (Array.isArray(files)) {
+    const names = files
+    files = []
+    for (const name of names) files.push(path.join(tempDir, name))
+  } else {
+    files = path.join(tempDir, files)
+  }
+  return new Promise(resolve => join(files, path.join(tempDir, output), err => resolve(err)))
 }
 
 function logs () {
-  return fs.readdirSync(tempDir).filter(f => /\.log$/.test(f))
+  const files = fs.readdirSync(tempDir)
+  const logFiles = []
+  for (const file of files) {
+    if (/\.log$/.test(file)) logFiles.push(file)
+  }
+  return logFiles
 }
 
 function read (name) {
@@ -213,7 +269,7 @@ function read (name) {
 }
 
 function clean () {
-  logs().forEach(name => fs.unlinkSync(path.join(tempDir, name)))
+  for (const name of logs()) fs.unlinkSync(path.join(tempDir, name))
 }
 
 function write (name, json) {
