@@ -7,17 +7,20 @@
     "node-trace-log-join": "./bin.js"
   },
   "scripts": {
-    "test": "standard && tape test.js"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "node --test index.test.js",
+    "test:coverage": "node --experimental-test-coverage --test-coverage-lines=100 --test-coverage-branches=100 --test index.test.js",
+    "bench": "node benchmark/run.js"
   },
   "dependencies": {
-    "@clinic/trace-events-parser": "^2.0.0",
-    "multistream": "^2.1.0",
-    "pump": "^3.0.0",
-    "through2": "^2.0.3"
+    "@clinic/trace-events-parser": "^2.0.0"
   },
   "devDependencies": {
-    "standard": "^11.0.1",
-    "tape": "^4.9.0"
+    "@types/node": "^24.19.2",
+    "eslint": "^10.5.0",
+    "neostandard": "^0.14.1",
+    "tinybench": "^6.2.3"
   },
   "repository": {
     "type": "git",
